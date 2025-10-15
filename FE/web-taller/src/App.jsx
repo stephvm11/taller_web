@@ -17,7 +17,6 @@ function App() {
     isActive: ''
   });
 
-  // Obtener todos los libros
   const fetchAllBooks = async () => {
     setLoading(true);
     setError('');
@@ -34,7 +33,6 @@ function App() {
     }
   };
 
-  // Buscar libro por ID
   const fetchBookById = async (id) => {
     if (!id) return;
     setLoading(true);
@@ -42,8 +40,14 @@ function App() {
     try {
       const response = await fetch(`${API_BASE_URL}/dataInfo/${id}`);
       const data = await response.json();
+      
       if (data.status) {
-        setBooks(data.item && typeof data.item === 'object' ? [data.item] : []);
+
+        const bookItem = data.item && typeof data.item === 'object' ? data.item : null;
+        
+        setBooks(bookItem ? [bookItem] : []); 
+      } else {
+        setBooks([]);
       }
     } catch (err) {
       setError('Error al buscar el libro');
@@ -52,7 +56,6 @@ function App() {
     }
   };
 
-  // Buscar por estado
   const fetchBooksByStatus = async (status) => {
     setLoading(true);
     setError('');
@@ -61,6 +64,8 @@ function App() {
       const data = await response.json();
       if (data.status) {
         setBooks(Array.isArray(data.data) ? data.data : []);
+      } else {
+        setBooks([]);
       }
     } catch (err) {
       setError('Error al filtrar por estado');
@@ -69,8 +74,7 @@ function App() {
     }
   };
 
-  // Búsqueda por query parameters
-  const fetchBooksByQuery = async (query) => {
+const fetchBooksByQuery = async (query) => {
     setLoading(true);
     setError('');
     try {
@@ -91,7 +95,7 @@ function App() {
     }
   };
 
-  // Efecto para cargar todos los libros al inicio
+
   useEffect(() => {
     fetchAllBooks();
   }, []);
@@ -122,11 +126,6 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>Biblioteca Digital</h1>
-        <p>Gestión y consulta de libros</p>
-      </header>
-
       <div className="search-section">
         <div className="search-group">
           <h3>Buscar por ID</h3>

@@ -18,7 +18,6 @@ app.get('/allData', (req, res) => {
 app.get('/dataInfo/:param', (req, res) => {
     const {param} = req.params;
     
-    // dataInfo/:idItem
     if (!isNaN(param)) {
       const id = parseInt(param, 10); 
       const book = books.find(b => b.id === id);
@@ -30,7 +29,6 @@ app.get('/dataInfo/:param', (req, res) => {
       return res.send(response);
     }
     
-    // dataInfo/:status
     if (param === 'true' || param === 'false') {
       const status = param === 'true';
       const filteredbooks = books.filter(b => b.isActive == status);
