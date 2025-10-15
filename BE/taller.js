@@ -42,9 +42,9 @@ app.get('/dataInfo/:status', (req, res) => {
 app.get('/dataInfoQuery', (req, res) => {
     const {search} = req.query;
     const filteredbooks = books.filter(b => 
-      b.id == search.id &&
-      b.isActive == search.isActive &&
-      b.nameBook == search.nameBook &&
+      b.id == search.id ||
+      b.isActive == search.isActive ||
+      b.nameBook == search.nameBook ||
       b.gender == search.gender
     );
     const response = {
