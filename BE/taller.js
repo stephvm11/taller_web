@@ -41,16 +41,20 @@ app.get('/dataInfo/:param', (req, res) => {
 });
 
 app.get('/dataInfoQuery', (req, res) => {
-    const {search} = req.query;
-    const filteredbooks = books.filter(b => 
-      b.id == search.id ||
-      b.isActive == search.isActive ||
-      b.nameBook == search.nameBook ||
-      b.gender == search.gender
-    );
+    const {id, status, picture, datePublish, nameBook, gender} = req.query;
+    const filteredBooks = books.filter(book => {
+        return (
+            (!id || book.id === id) &&
+            (!status || book.isActive.toString() === status) &&
+            (!picture || book.picture === picture) &&
+            (!datePublish || book.datePublish === datePublish) &&
+            (!nameBook || book.nameBook.includes(nameBook)) &&
+            (!gender || book.gender === gender)
+        );
+    });
     const response = {
         status: true,
-        data: filteredbooks || 'Parámetros no válidos',
+        data: filteredBooks || 'Libro(s) no encontrado(s)',
         dateTime: new Date().toLocaleDateString()
     }
     res.send(response);
@@ -59,4 +63,3 @@ app.get('/dataInfoQuery', (req, res) => {
 app.listen(port, () => {
   console.log(`API escuchando en http://localhost:${port}`);
 });
-
