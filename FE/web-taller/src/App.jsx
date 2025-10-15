@@ -1,35 +1,221 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import BookCard from './bookCard';
+import './App.css';
+
+const API_BASE_URL = 'http://localhost:3000';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [searchId, setSearchId] = useState('');
+  const [searchStatus, setSearchStatus] = useState('');
+  const [searchQuery, setSearchQuery] = useState({
+    id: '',
+    nameBook: '',
+    gender: '',
+    isActive: ''
+  });
+
+  // Obtener todos los libros
+  const fetchAllBooks = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/allData`);
+      const data = await response.json();
+      if (data.status) {
+        setBooks(Array.isArray(data.data) ? data.data : []);
+      }
+    } catch (err) {
+      setError('Error al cargar los libros');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Buscar libro por ID
+  const fetchBookById = async (id) => {
+    if (!id) return;
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/dataInfo/${id}`);
+      const data = await response.json();
+      if (data.status) {
+        setBooks(data.item && typeof data.item === 'object' ? [data.item] : []);
+      }
+    } catch (err) {
+      setError('Error al buscar el libro');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Buscar por estado
+  const fetchBooksByStatus = async (status) => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/dataInfo/${status}`);
+      const data = await response.json();
+      if (data.status) {
+        setBooks(Array.isArray(data.data) ? data.data : []);
+      }
+    } catch (err) {
+      setError('Error al filtrar por estado');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Búsqueda por query parameters
+  const fetchBooksByQuery = async (query) => {
+    setLoading(true);
+    setError('');
+    try {
+      const queryParams = new URLSearchParams();
+      Object.keys(query).forEach(key => {
+        if (query[key]) queryParams.append(key, query[key]);
+      });
+      
+      const response = await fetch(`${API_BASE_URL}/dataInfoQuery?${queryParams}`);
+      const data = await response.json();
+      if (data.status) {
+        setBooks(Array.isArray(data.data) ? data.data : []);
+      }
+    } catch (err) {
+      setError('Error en la búsqueda avanzada');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Efecto para cargar todos los libros al inicio
+  useEffect(() => {
+    fetchAllBooks();
+  }, []);
+
+  const handleSearchById = (e) => {
+    e.preventDefault();
+    if (searchId) {
+      fetchBookById(searchId);
+    }
+  };
+
+  const handleSearchByStatus = (status) => {
+    setSearchStatus(status);
+    fetchBooksByStatus(status);
+  };
+
+  const handleQuerySearch = (e) => {
+    e.preventDefault();
+    fetchBooksByQuery(searchQuery);
+  };
+
+  const resetSearch = () => {
+    setSearchId('');
+    setSearchStatus('');
+    setSearchQuery({ id: '', nameBook: '', gender: '', isActive: '' });
+    fetchAllBooks();
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className="app">
+      <header className="app-header">
+        <h1>Biblioteca Digital</h1>
+        <p>Gestión y consulta de libros</p>
+      </header>
+
+      <div className="search-section">
+        <div className="search-group">
+          <h3>Buscar por ID</h3>
+          <form onSubmit={handleSearchById} className="search-form">
+            <input
+              type="number"
+              placeholder="ID del libro"
+              value={searchId}
+              onChange={(e) => setSearchId(e.target.value)}
+            />
+            <button type="submit">Buscar</button>
+          </form>
+        </div>
+
+        <div className="search-group">
+          <h3>Filtrar por estado</h3>
+          <div className="button-group">
+            <button 
+              onClick={() => handleSearchByStatus('true')}
+              className={searchStatus === 'true' ? 'active' : ''}
+            >
+              Activos
+            </button>
+            <button 
+              onClick={() => handleSearchByStatus('false')}
+              className={searchStatus === 'false' ? 'active' : ''}
+            >
+              Inactivos
+            </button>
+          </div>
+        </div>
+
+        <div className="search-group">
+          <h3>Búsqueda avanzada</h3>
+          <form onSubmit={handleQuerySearch} className="advanced-search">
+            <input
+              type="text"
+              placeholder="Nombre del libro"
+              value={searchQuery.nameBook}
+              onChange={(e) => setSearchQuery({...searchQuery, nameBook: e.target.value})}
+            />
+            <input
+              type="text"
+              placeholder="Género"
+              value={searchQuery.gender}
+              onChange={(e) => setSearchQuery({...searchQuery, gender: e.target.value})}
+            />
+            <select
+              value={searchQuery.isActive}
+              onChange={(e) => setSearchQuery({...searchQuery, isActive: e.target.value})}
+            >
+              <option value="">Todos los estados</option>
+              <option value="true">Activo</option>
+              <option value="false">Inactivo</option>
+            </select>
+            <button type="submit">Buscar</button>
+          </form>
+        </div>
+
+        <button onClick={resetSearch} className="reset-btn">
+          Mostrar Todos
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+
+      {loading && <div className="loading">Cargando...</div>}
+      {error && <div className="error">{error}</div>}
+
+      <div className="results-section">
+        <h2>Resultados ({books.length} libros)</h2>
+        <div className="books-grid">
+          {books.length > 0 ? (
+            books.map(book => (
+              <BookCard
+                key={book.id}
+                id={book.id}
+                nameBook={book.nameBook}
+                gender={book.gender}
+                isActive={book.isActive}
+                datePublish={book.datePublish}
+                picture={book.picture}
+              />
+            ))
+          ) : (
+            !loading && <div className="no-results">No se encontraron libros</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;

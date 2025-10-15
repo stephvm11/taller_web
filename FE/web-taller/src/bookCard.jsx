@@ -1,6 +1,6 @@
 import "./bookCard.css";
 
-const CardScientist = ({
+const BookCard = ({
   id,
   isActive,
   picture,
@@ -9,27 +9,28 @@ const CardScientist = ({
   gender
 }) => {
   return (
-    <div className="book-card"> <h2>{}</h2>
-      <img src={picture} className="card-image" />
+    <div className="book-card">
+      <h2>{nameBook}</h2>
+      <img src={picture} alt={nameBook} className="card-image" />
       <ul>
         <li>
           <strong>Id:</strong> {id}
         </li>
         <li>
-          <strong>NameBook:</strong> {nameBook}
+          <strong>Nombre:</strong> {nameBook}
         </li>
         <li>
-          <strong>Gender:</strong> {gender}
+          <strong>Género:</strong> {gender}
         </li>
         <li>
-          <strong>IsActive:</strong> {isActive}
+          <strong>Activo:</strong> {isActive ? 'Sí' : 'No'}
         </li>
         <li>
-          <strong>datePublish:</strong> {datePublish}
+          <strong>Fecha Publicación:</strong> {new Date(datePublish).toLocaleDateString()}
         </li>
       </ul>
     </div>
   );
 };
 
-export default bookCard;
+export default BookCard;
