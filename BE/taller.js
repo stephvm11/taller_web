@@ -25,6 +25,36 @@ app.get('/dataInfo/:idItem', (req, res) => {
   res.send(response);
 });
 
+
+app.get('/dataInfo/:status', (req, res) => {
+  const {status} = req.params;
+  if (status == 'true' || status == 'false') {
+    const filteredbooks = books.filter(b => b.isActive == status);
+    const response = {
+        status: true,
+        data: filteredbooks || 'Parámetro no válido',
+        dateTime: new Date().toLocaleDateString()
+    }
+    res.send(response);
+  }
+});
+
+app.get('/dataInfoQuery', (req, res) => {
+    const {search} = req.query;
+    const filteredbooks = books.filter(b => 
+      b.id == search.id &&
+      b.isActive == search.isActive &&
+      b.nameBook == search.nameBook &&
+      b.gender == search.gender
+    );
+    const response = {
+        status: true,
+        data: filteredbooks || 'Parámetros no válidos',
+        dateTime: new Date().toLocaleDateString()
+    }
+    res.send(response);
+});
+
 app.listen(port, () => {
   console.log(`API escuchando en http://localhost:${port}`);
 });
