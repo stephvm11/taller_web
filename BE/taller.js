@@ -12,31 +12,32 @@ app.get('/allData', (req, res) => {
   res.send(response);
 });
 
-
-app.get('/dataInfo/:idItem', (req, res) => {
-    const {idItem} = req.params;
-    const id = parseInt(idItem, 10); 
-    const book = books.find(b => b.id === id);
-    const response = {
+app.get('/dataInfo/:param', (req, res) => {
+    const {param} = req.params;
+    
+    // dataInfo/:idItem
+    if (!isNaN(param)) {
+      const id = parseInt(param, 10); 
+      const book = books.find(b => b.id === id);
+      const response = {
         status: true,
         item: book || 'Libro no encontrado',
         dateTime: new Date().toLocaleDateString()
+      }
+      return res.send(response);
     }
-  res.send(response);
-});
-
-
-app.get('/dataInfo/:status', (req, res) => {
-  const {status} = req.params;
-  if (status == 'true' || status == 'false') {
-    const filteredbooks = books.filter(b => b.isActive == status);
-    const response = {
+    
+    // dataInfo/:status
+    if (param === 'true' || param === 'false') {
+      const status = param === 'true';
+      const filteredbooks = books.filter(b => b.isActive == status);
+      const response = {
         status: true,
-        data: filteredbooks || 'Parámetro no válido',
+        data: filteredbooks,
         dateTime: new Date().toLocaleDateString()
+      }
+      return res.send(response);
     }
-    res.send(response);
-  }
 });
 
 app.get('/dataInfoQuery', (req, res) => {
